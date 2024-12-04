@@ -1,0 +1,44 @@
+name: second_have_to_do
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  line_icons: ^2.0.2
+  get: ^4.6.6
+  flutter_slidable: ^3.1.1
+  fluttertoast: ^8.2.4
+  json_annotation: ^4.9.0
+  dio: ^5.4.3+1
+  intl: ^0.18.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+  build_runner: ^2.3.3
+  json_serializable: ^6.8.0
+
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/PretendardVariable.woff2
+
