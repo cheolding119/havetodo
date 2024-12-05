@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:second_have_to_do/page/main_page/diary_page.dart/diary_page.dart';
 import 'package:second_have_to_do/page/main_page/todolist_page.dart/today_todolist_page/today_todolist_page.dart';
-import 'package:second_have_to_do/page/main_page/todolist_page.dart/completionplan_todolist_page/completionplan_todolist_page.dart';
+import 'package:second_have_to_do/page/main_page/completionplan_todolist_page/completionplan_todolist_page.dart';
 
 class BottomNavigationPage extends StatefulWidget {
   const BottomNavigationPage({super.key});

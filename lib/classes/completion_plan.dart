@@ -36,7 +36,7 @@ class CompletionPlan {
   RxBool checked = false.obs;
 
   // //완료목표안에 들어갈 목표
-  List<Plan> plans = List.empty();
+  List<Plan> plans = [];
 
   //생성자
   CompletionPlan({required this.completionPlanPlanId});

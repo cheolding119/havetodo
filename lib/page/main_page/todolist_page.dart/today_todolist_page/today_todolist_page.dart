@@ -258,7 +258,6 @@ class TodayTodoListPageState extends State<TodayTodoListPage> {
                   const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
-                      print('여기맞음');
                       updatePlan(context, todayPlanItem);
                     },
                     child: Container(

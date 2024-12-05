@@ -16,7 +16,7 @@ class TodayTodoListPageData extends GetxController {
   void onInit() {
     memberId = data.user.memberId;
     super.onInit();
-    loadPlanDatas(memberId);
+    loadPlanDatas(1);
   }
 
   /*
