@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:second_have_to_do/classes/completion_plan.dart';
 import 'package:second_have_to_do/classes/plan.dart';
 import 'package:second_have_to_do/global_definition.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 import 'completionplan_todolist.data.dart';
 
@@ -265,6 +267,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   //완료목표 추가하는 로직
   Future<dynamic> addTodoPlan(BuildContext context) {
     TextEditingController todayPlanController = TextEditingController();
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true, // 이 부분을 추가하여 스크롤이 가능하게 설정
@@ -272,82 +275,245 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
         // 모달이 열릴 때 TextField에 자동으로 포커스를 맞춤
 
         return Padding(
-          padding: MediaQuery.of(context).viewInsets, // 키보드가 올라왔을 때의 패딩을 추가
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            height: 150, // 모달 높이 크기
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.tertiary,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(5), // 모달 좌상단 라운딩 처리
-                topRight: Radius.circular(5), // 모달 우상단 라운딩 처리
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  child: const Icon(LineIcons.arrowLeft),
+            padding: MediaQuery.of(context).viewInsets, // 키보드가 올라왔을 때의 패딩을 추가
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              height: 150, // 모달 높이 크기
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.tertiary,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(5), // 모달 좌상단 라운딩 처리
+                  topRight: Radius.circular(5), // 모달 우상단 라운딩 처리
                 ),
-                Expanded(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelStyle: Theme.of(context).textTheme.bodySmall,
-                        hintStyle: Theme.of(context).textTheme.titleMedium,
-                        hintText: '작업을 입력하세요. . .',
-                        border: InputBorder.none,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Get.back();
+                        },
+                        child: const Icon(LineIcons.arrowLeft),
                       ),
-                      autofocus: true,
-                      controller: todayPlanController,
-                      cursorColor: Theme.of(context).colorScheme.secondary,
+                      Row(
+                        children: [
+                          Obx(
+                            () => SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: data.selectImportant.value ==
+                                      ImportanceLevel.highImportance
+                                  ? Image.asset('assets/images/redlogo.png')
+                                  : (data.selectImportant.value ==
+                                          ImportanceLevel.middleImportance)
+                                      ? Image.asset(
+                                          'assets/images/yellowlogo.png')
+                                      : Image.asset(
+                                          'assets/images/greenlogo.png'),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Obx(
+                            () => Text(data.selectImportant.value ==
+                                    ImportanceLevel.highImportance
+                                ? '중요'
+                                : (data.selectImportant.value ==
+                                        ImportanceLevel.middleImportance)
+                                    ? '보통'
+                                    : '조금중요'),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(DateFormat('yyyy-MM-dd').format(DateTime.now())),
+                        ],
+                      )
+                    ],
+                  ),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10)),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelStyle: Theme.of(context).textTheme.bodySmall,
+                          hintStyle: Theme.of(context).textTheme.titleMedium,
+                          hintText: '작업을 입력하세요. . .',
+                          border: InputBorder.none,
+                        ),
+                        autofocus: true,
+                        controller: todayPlanController,
+                        cursorColor: Theme.of(context).colorScheme.secondary,
+                      ),
                     ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        showImportantDialog(context);
-                      },
-                      child: Container(
-                          padding: const EdgeInsets.all(7),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
+                          showCalendarDialog(context);
+                        },
+                        child: Container(
                           margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
                           height: 40,
                           width: 40,
                           decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.secondary,
                               borderRadius: BorderRadius.circular(20)),
-                          child: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child:
-                                  Image.asset('assets/images/whitelogo.png'))),
-                    ),
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: const Icon(Icons.check),
+                          child: const Icon(LineIcons.calendar),
+                        ),
                       ),
-                    )
-                  ],
-                )
-              ],
-            ),
-          ),
-        );
+                      InkWell(
+                        onTap: () {
+                          showImportantDialog(context);
+                        },
+                        child: Container(
+                            padding: const EdgeInsets.all(7),
+                            margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.secondary,
+                                borderRadius: BorderRadius.circular(20)),
+                            child: SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: Image.asset(
+                                    'assets/images/whitelogo.png'))),
+                      ),
+                      InkWell(
+                        onTap: () {},
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(20)),
+                          child: const Icon(Icons.check),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ));
       },
+    ).then((value) {
+      // 바텀시트가 닫힌 뒤 실행되는 로직
+      Future.delayed(const Duration(milliseconds: 500), () {
+        data.selectImportant.value = ImportanceLevel.highImportance;
+        print("1초 후 중요도 설정 완료.");
+      });
+    });
+  }
+
+  //완료목표 지정날짜를 선택하기 위한 달력
+  void showCalendarDialog(BuildContext context) {
+    Rx<DateTime> selectedDay = DateTime.now().obs;
+    Rx<DateTime> focusedDay = DateTime.now().obs;
+    //선택된 날짜
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => Dialog(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: SizedBox(
+          height: 400,
+          width: 300,
+          child: Column(
+            children: [
+              Obx(
+                () => SingleChildScrollView(
+                  child: TableCalendar(
+                    //헤더 스타일 지정
+                    headerStyle: HeaderStyle(
+                      titleCentered: true,
+                      titleTextFormatter: (date, locale) =>
+                          DateFormat.yMMMMd(locale).format(date),
+                      formatButtonVisible: false,
+                      titleTextStyle: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.white),
+                      headerPadding: const EdgeInsets.symmetric(vertical: 4.0),
+                      leftChevronIcon: const Icon(
+                        Icons.arrow_left,
+                        size: 40.0,
+                      ),
+                      rightChevronIcon: const Icon(
+                        Icons.arrow_right,
+                        size: 40.0,
+                      ),
+                    ),
+                    //캘린더 스타일 지정
+                    calendarStyle: CalendarStyle(
+                        todayTextStyle: Theme.of(context).textTheme.bodySmall!,
+                        weekendTextStyle:
+                            Theme.of(context).textTheme.bodySmall!,
+                        selectedTextStyle:
+                            Theme.of(context).textTheme.bodySmall!,
+                        selectedDecoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          shape: BoxShape.circle,
+                        )),
+
+                    firstDay: DateTime.utc(2010, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+
+                    locale: 'ko-KR',
+                    focusedDay: focusedDay.value,
+                    onDaySelected:
+                        (DateTime selectedDay2, DateTime focusedDay2) {
+                      // 선택된 날짜의 상태를 갱신합니다.
+                      setState(() {
+                        selectedDay.value = selectedDay2;
+                        focusedDay.value = focusedDay2;
+                      });
+                    },
+
+                    selectedDayPredicate: (DateTime day) {
+                      // selectedDay 와 동일한 날짜의 모양을 바꿔줍니다.
+                      return isSameDay(selectedDay.value, day);
+                    },
+                  ),
+                ),
+                //
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      data.selectEndDateTime.value = selectedDay.value;
+                      print("날짜여기");
+                      print(data.selectEndDateTime.value);
+                      Get.back();
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 40,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).colorScheme.secondary),
+                      child: const Icon(
+                        LineIcons.check,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -392,29 +558,34 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
     );
   }
 
+  //중요도 체크 컴포넌트
   Widget _buildImportantCheckList(Image image, String content,
       ImportanceLevel importantLevel, VoidCallback onTap) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 3),
-        height: 70,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.tertiary,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: 30, height: 30, child: image),
-            const SizedBox(width: 30),
-            Text(content,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: Colors.white)),
-          ],
+      child: Obx(
+        () => Container(
+          margin: const EdgeInsets.symmetric(vertical: 3),
+          height: 70,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: data.selectImportant.value == importantLevel
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.tertiary,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(width: 30, height: 30, child: image),
+              const SizedBox(width: 30),
+              Text(content,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Colors.white)),
+            ],
+          ),
         ),
       ),
     );
