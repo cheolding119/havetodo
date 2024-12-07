@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:second_have_to_do/classes/completion_plan.dart';
 import 'package:second_have_to_do/classes/plan.dart';
+import 'package:second_have_to_do/global_definition.dart';
 
 import 'completionplan_todolist.data.dart';
 
@@ -274,7 +275,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
           padding: MediaQuery.of(context).viewInsets, // 키보드가 올라왔을 때의 패딩을 추가
           child: Container(
             padding: const EdgeInsets.all(5),
-            height: 200, // 모달 높이 크기
+            height: 150, // 모달 높이 크기
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.tertiary,
               borderRadius: const BorderRadius.only(
@@ -311,15 +312,22 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        showImportantDialog(context);
+                      },
                       child: Container(
+                          padding: const EdgeInsets.all(7),
                           margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
                           height: 40,
                           width: 40,
                           decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.secondary,
                               borderRadius: BorderRadius.circular(20)),
-                          child: Image.asset('assets/images/whitelogo.png')),
+                          child: SizedBox(
+                              height: 20,
+                              width: 20,
+                              child:
+                                  Image.asset('assets/images/whitelogo.png'))),
                     ),
                     InkWell(
                       onTap: () {},
@@ -340,6 +348,75 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
           ),
         );
       },
+    );
+  }
+
+  //중요도를 선택하는 다이얼로그
+  void showImportantDialog(BuildContext context) {
+    //선택된 중요도
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => Dialog(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+            ),
+            height: 300,
+            width: 20,
+            child: Column(
+              children: [
+                _buildImportantCheckList(
+                    Image.asset('assets/images/redlogo.png'),
+                    '중요',
+                    ImportanceLevel.highImportance, () {
+                  data.selectImportant.value = ImportanceLevel.highImportance;
+                }),
+                _buildImportantCheckList(
+                    Image.asset('assets/images/yellowlogo.png'),
+                    '보통',
+                    ImportanceLevel.middleImportance, () {
+                  data.selectImportant.value = ImportanceLevel.middleImportance;
+                }),
+                _buildImportantCheckList(
+                    Image.asset('assets/images/greenlogo.png'),
+                    '조금 중요',
+                    ImportanceLevel.lowImportance, () {
+                  data.selectImportant.value = ImportanceLevel.lowImportance;
+                }),
+              ],
+            ),
+          )),
+    );
+  }
+
+  Widget _buildImportantCheckList(Image image, String content,
+      ImportanceLevel importantLevel, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 3),
+        height: 70,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.tertiary,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(width: 30, height: 30, child: image),
+            const SizedBox(width: 30),
+            Text(content,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: Colors.white)),
+          ],
+        ),
+      ),
     );
   }
 
