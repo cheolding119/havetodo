@@ -1,16 +1,11 @@
 # second_have_to_do
 
-A new Flutter project.
+- - -
+## 첫 플러터 프로젝트!! 
 
-## Getting Started
+1.일반적인 투두리스트 기능을 제공
 
-This project is a starting point for a Flutter application.
+2.필요없는 계획은 빼고 한달을 설정 해놓고 실행하는 완료목표 기능을 제공
 
-A few resources to get you started if this is your first Flutter project:
+3.일기장 기능 (준비중)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
