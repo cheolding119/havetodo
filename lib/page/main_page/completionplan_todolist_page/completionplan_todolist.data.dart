@@ -9,7 +9,7 @@ class CompletionPlanPageData extends GetxController {
   //완료목표가 클리어시 담기는 리스트
   final RxList<CompletionPlan> completedPlanItems = <CompletionPlan>[].obs;
   //계획생성시 완료목표 중요도 닮는 변수
-  Rx<ImportanceLevel> selectImportant = ImportanceLevel.middleImportance.obs;
+  // Rx<ImportanceLevel> selectImportant = ImportanceLevel.middleImportance.obs;
   //계획생성시 시간을 닮는 변수
   Rx<DateTime> selectEndDateTime = DateTime.now().obs;
 

@@ -5,6 +5,7 @@ import 'package:second_have_to_do/classes/rx_string_converter.dart';
 import 'package:second_have_to_do/global_definition.dart';
 
 import 'plan.dart';
+
 part 'completion_plan.g.dart';
 
 //책 oneThing 에서 영감을 받은 완료목표
@@ -18,13 +19,14 @@ class CompletionPlan {
   @RxStringConverter()
   RxString planContent = ''.obs;
 
-  //중요도 체크
+  // 중요도 체크
+
   ImportanceLevel importanceLevel = ImportanceLevel.none;
 
-  //시작날짜를 넣기위한 클래스
+  // 시작날짜
   DateTime startDateTime = DateTime.now();
 
-  //종료날짜를 정하기 위한 클래스
+  // 종료날짜
   DateTime endDateTime = DateTime.now();
 
   //남은날짜를 볼수있는 String 클래스

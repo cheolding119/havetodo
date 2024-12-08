@@ -100,14 +100,16 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                       )
                     : Container(),
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: data.planItems.length,
-                itemBuilder: (context, index) {
-                  return _buildCompletionPlan(data.planItems[index]);
-                },
-              )
+              Obx(
+                () => ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: data.planItems.length,
+                  itemBuilder: (context, index) {
+                    return _buildCompletionPlan(data.planItems[index]);
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -118,6 +120,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   //완료목표 로직
   Widget _buildCompletionPlan(CompletionPlan completionPlan) {
     Size screenSize = MediaQuery.of(context).size;
+
     return Container(
       padding: const EdgeInsets.all(10),
       width: screenSize.width - 30,
@@ -267,6 +270,8 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   //완료목표 추가하는 로직
   Future<dynamic> addTodoPlan(BuildContext context) {
     TextEditingController todayPlanController = TextEditingController();
+    Rx<DateTime> selectedEndDay = DateTime.now().obs;
+    Rx<ImportanceLevel> selectImportant = ImportanceLevel.middleImportance.obs;
 
     return showModalBottomSheet(
       context: context,
@@ -300,14 +305,36 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                       ),
                       Row(
                         children: [
+                          DateFormat('yyyy-MM-dd').format(DateTime.now()) ==
+                                  DateFormat('yyyy-MM-dd')
+                                      .format(selectedEndDay.value)
+                              ? Container()
+                              : Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 0),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary),
+                                  child: Text(
+                                    DateFormat('yyyy-MM-dd')
+                                        .format(selectedEndDay.value),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                          const SizedBox(width: 15),
                           Obx(
                             () => SizedBox(
                               height: 25,
                               width: 25,
-                              child: data.selectImportant.value ==
+                              child: selectImportant.value ==
                                       ImportanceLevel.highImportance
                                   ? Image.asset('assets/images/redlogo.png')
-                                  : (data.selectImportant.value ==
+                                  : (selectImportant.value ==
                                           ImportanceLevel.middleImportance)
                                       ? Image.asset(
                                           'assets/images/yellowlogo.png')
@@ -317,16 +344,20 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                           ),
                           const SizedBox(width: 5),
                           Obx(
-                            () => Text(data.selectImportant.value ==
-                                    ImportanceLevel.highImportance
-                                ? '중요'
-                                : (data.selectImportant.value ==
-                                        ImportanceLevel.middleImportance)
-                                    ? '보통'
-                                    : '조금중요'),
+                            () => Text(
+                                selectImportant.value ==
+                                        ImportanceLevel.highImportance
+                                    ? '중요'
+                                    : (selectImportant.value ==
+                                            ImportanceLevel.middleImportance)
+                                        ? '보통'
+                                        : '조금중요',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(color: Colors.white)),
                           ),
-                          const SizedBox(width: 10),
-                          Text(DateFormat('yyyy-MM-dd').format(DateTime.now())),
+                          const SizedBox(width: 15),
                         ],
                       )
                     ],
@@ -355,8 +386,9 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                     children: [
                       InkWell(
                         onTap: () {
+                          data.selectEndDateTime.value = DateTime.now();
                           FocusScope.of(context).unfocus();
-                          showCalendarDialog(context);
+                          showCalendarDialog(context, selectedEndDay);
                         },
                         child: Container(
                           margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
@@ -370,7 +402,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                       ),
                       InkWell(
                         onTap: () {
-                          showImportantDialog(context);
+                          showImportantDialog(context, selectImportant);
                         },
                         child: Container(
                             padding: const EdgeInsets.all(7),
@@ -387,7 +419,19 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                                     'assets/images/whitelogo.png'))),
                       ),
                       InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          CompletionPlan plan =
+                              CompletionPlan(completionPlanPlanId: 1);
+                          plan.planContent.value = todayPlanController.text;
+                          plan.importanceLevel = selectImportant.value;
+                          plan.endDateTime = selectedEndDay.value;
+                          plan.startDateTime = DateTime.now();
+                          final duration =
+                              plan.endDateTime.difference(plan.startDateTime);
+                          plan.remainingDays.value = '${duration.inDays}';
+                          data.planItems.add(plan);
+                          Get.back();
+                        },
                         child: Container(
                           margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
                           height: 40,
@@ -407,17 +451,18 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
     ).then((value) {
       // 바텀시트가 닫힌 뒤 실행되는 로직
       Future.delayed(const Duration(milliseconds: 500), () {
-        data.selectImportant.value = ImportanceLevel.highImportance;
+        selectImportant.value = ImportanceLevel.highImportance;
         print("1초 후 중요도 설정 완료.");
       });
     });
   }
 
   //완료목표 지정날짜를 선택하기 위한 달력
-  void showCalendarDialog(BuildContext context) {
+  void showCalendarDialog(BuildContext context, Rx<DateTime> selectedEndDay) {
     Rx<DateTime> selectedDay = DateTime.now().obs;
     Rx<DateTime> focusedDay = DateTime.now().obs;
     //선택된 날짜
+    selectedEndDay.value = DateTime.now();
 
     showDialog(
       context: context,
@@ -429,59 +474,54 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
           child: Column(
             children: [
               Obx(
-                () => SingleChildScrollView(
-                  child: TableCalendar(
-                    //헤더 스타일 지정
-                    headerStyle: HeaderStyle(
-                      titleCentered: true,
-                      titleTextFormatter: (date, locale) =>
-                          DateFormat.yMMMMd(locale).format(date),
-                      formatButtonVisible: false,
-                      titleTextStyle: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(color: Colors.white),
-                      headerPadding: const EdgeInsets.symmetric(vertical: 4.0),
-                      leftChevronIcon: const Icon(
-                        Icons.arrow_left,
-                        size: 40.0,
-                      ),
-                      rightChevronIcon: const Icon(
-                        Icons.arrow_right,
-                        size: 40.0,
-                      ),
+                () => TableCalendar(
+                  //헤더 스타일 지정
+                  headerStyle: HeaderStyle(
+                    titleCentered: true,
+                    titleTextFormatter: (date, locale) =>
+                        DateFormat.yMMMMd(locale).format(date),
+                    formatButtonVisible: false,
+                    titleTextStyle: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(color: Colors.white),
+                    headerPadding: const EdgeInsets.symmetric(vertical: 4.0),
+                    leftChevronIcon: const Icon(
+                      Icons.arrow_left,
+                      size: 40.0,
                     ),
-                    //캘린더 스타일 지정
-                    calendarStyle: CalendarStyle(
-                        todayTextStyle: Theme.of(context).textTheme.bodySmall!,
-                        weekendTextStyle:
-                            Theme.of(context).textTheme.bodySmall!,
-                        selectedTextStyle:
-                            Theme.of(context).textTheme.bodySmall!,
-                        selectedDecoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          shape: BoxShape.circle,
-                        )),
-
-                    firstDay: DateTime.utc(2010, 10, 16),
-                    lastDay: DateTime.utc(2030, 3, 14),
-
-                    locale: 'ko-KR',
-                    focusedDay: focusedDay.value,
-                    onDaySelected:
-                        (DateTime selectedDay2, DateTime focusedDay2) {
-                      // 선택된 날짜의 상태를 갱신합니다.
-                      setState(() {
-                        selectedDay.value = selectedDay2;
-                        focusedDay.value = focusedDay2;
-                      });
-                    },
-
-                    selectedDayPredicate: (DateTime day) {
-                      // selectedDay 와 동일한 날짜의 모양을 바꿔줍니다.
-                      return isSameDay(selectedDay.value, day);
-                    },
+                    rightChevronIcon: const Icon(
+                      Icons.arrow_right,
+                      size: 40.0,
+                    ),
                   ),
+                  //캘린더 스타일 지정
+                  calendarStyle: CalendarStyle(
+                      todayTextStyle: Theme.of(context).textTheme.bodySmall!,
+                      weekendTextStyle: Theme.of(context).textTheme.bodySmall!,
+                      selectedTextStyle: Theme.of(context).textTheme.bodySmall!,
+                      selectedDecoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        shape: BoxShape.circle,
+                      )),
+
+                  firstDay: DateTime.utc(2010, 10, 16),
+                  lastDay: DateTime.utc(2030, 3, 14),
+
+                  locale: 'ko-KR',
+                  focusedDay: focusedDay.value,
+                  onDaySelected: (DateTime selectedDay2, DateTime focusedDay2) {
+                    // 선택된 날짜의 상태를 갱신합니다.
+                    setState(() {
+                      selectedDay.value = selectedDay2;
+                      focusedDay.value = focusedDay2;
+                    });
+                  },
+
+                  selectedDayPredicate: (DateTime day) {
+                    // selectedDay 와 동일한 날짜의 모양을 바꿔줍니다.
+                    return isSameDay(selectedDay.value, day);
+                  },
                 ),
                 //
               ),
@@ -490,9 +530,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      data.selectEndDateTime.value = selectedDay.value;
-                      print("날짜여기");
-                      print(data.selectEndDateTime.value);
+                      selectedEndDay.value = selectedDay.value;
                       Get.back();
                     },
                     child: Container(
@@ -518,7 +556,8 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   }
 
   //중요도를 선택하는 다이얼로그
-  void showImportantDialog(BuildContext context) {
+  void showImportantDialog(
+      BuildContext context, Rx<ImportanceLevel> selectImportant) {
     //선택된 중요도
 
     showDialog(
@@ -538,20 +577,20 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                     Image.asset('assets/images/redlogo.png'),
                     '중요',
                     ImportanceLevel.highImportance, () {
-                  data.selectImportant.value = ImportanceLevel.highImportance;
-                }),
+                  selectImportant.value = ImportanceLevel.highImportance;
+                }, selectImportant),
                 _buildImportantCheckList(
                     Image.asset('assets/images/yellowlogo.png'),
                     '보통',
                     ImportanceLevel.middleImportance, () {
-                  data.selectImportant.value = ImportanceLevel.middleImportance;
-                }),
+                  selectImportant.value = ImportanceLevel.middleImportance;
+                }, selectImportant),
                 _buildImportantCheckList(
                     Image.asset('assets/images/greenlogo.png'),
                     '조금 중요',
                     ImportanceLevel.lowImportance, () {
-                  data.selectImportant.value = ImportanceLevel.lowImportance;
-                }),
+                  selectImportant.value = ImportanceLevel.lowImportance;
+                }, selectImportant),
               ],
             ),
           )),
@@ -559,8 +598,12 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   }
 
   //중요도 체크 컴포넌트
-  Widget _buildImportantCheckList(Image image, String content,
-      ImportanceLevel importantLevel, VoidCallback onTap) {
+  Widget _buildImportantCheckList(
+      Image image,
+      String content,
+      ImportanceLevel importantLevel,
+      VoidCallback onTap,
+      Rx<ImportanceLevel> selectImportant) {
     return GestureDetector(
       onTap: onTap,
       child: Obx(
@@ -569,7 +612,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
           height: 70,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: data.selectImportant.value == importantLevel
+            color: selectImportant.value == importantLevel
                 ? Theme.of(context).colorScheme.secondary
                 : Theme.of(context).colorScheme.tertiary,
             borderRadius: BorderRadius.circular(16),
