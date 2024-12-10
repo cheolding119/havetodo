@@ -134,8 +134,19 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                 Row(
                   children: [
                     SizedBox(
-                        width: 25,
-                        child: Image.asset('assets/images/redlogo.png')),
+                      width: 25,
+                      child: Obx(
+                        () => Image.asset(
+                          completionPlan.importanceLevel.value ==
+                                  ImportanceLevel.highImportance
+                              ? 'assets/images/redlogo.png'
+                              : (completionPlan.importanceLevel.value ==
+                                      ImportanceLevel.middleImportance
+                                  ? 'assets/images/yellowlogo.png'
+                                  : 'assets/images/greenlogo.png'),
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 10),
                     Text(completionPlan.planContent.value,
                         style: Theme.of(context).textTheme.titleMedium)
@@ -143,10 +154,15 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                 ),
                 Row(
                   children: [
-                    Text(
-                      'D-40',
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.secondary),
+                    Obx(
+                      () => Text(
+                        completionPlan.remainingDays.value,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(
+                                color: Theme.of(context).colorScheme.secondary),
+                      ),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -170,195 +186,22 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
             ),
             child: Column(
               children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: completionPlan.plans.length,
-                  itemBuilder: (context, index) {
-                    return _buildBasicPlan(
-                        key: ValueKey(completionPlan.plans[index]),
-                        todayPlanItem: completionPlan.plans[index]);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //완료목표를 수정할 수 있는 메뉴목록이 있는 바텀시트
-  Future<dynamic> completionPlanMenuBottomSheet(
-      BuildContext context, CompletionPlan completionPlan) {
-    Size screenSize = MediaQuery.of(context).size;
-    return showModalBottomSheet(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(40), // 상단 라운딩 처리
-        ),
-      ),
-      isScrollControlled: true, // 이 부분을 추가하여 스크롤이 가능하게 설정
-      builder: (BuildContext context) {
-        // 모달이 열릴 때 TextField에 자동으로 포커스를 맞춤
-
-        return Container(
-          padding: const EdgeInsets.all(15),
-          height: 240, // 모달 높이 크기
-          width: screenSize.width - 80,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(40), // 모달 좌상단 라운딩 처리
-              topRight: Radius.circular(40), // 모달 우상단 라운딩 처리
-            ),
-          ),
-          child: Column(
-            children: [
-              buildBottomSheetMenuItem("단일 계획 추가하기", () {
-                // 첫 번째 바텀시트를 닫음
-                Get.back();
-
-                // 3초 뒤에 두 번째 바텀시트를 호출
-                addtoDayPlan(context, completionPlan);
-              }),
-              _buildDividingLine(),
-              buildBottomSheetMenuItem("계획 수정하기", () {}),
-              _buildDividingLine(),
-              buildBottomSheetMenuItem("계획 삭제하기", () {}),
-              _buildDividingLine(),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  //단일계획 추가 바텀시트 관련 메서드
-  Future<dynamic> addtoDayPlan(
-      BuildContext context, CompletionPlan completionPlan) {
-    TextEditingController todayPlanController = TextEditingController();
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // 이 부분을 추가하여 스크롤이 가능하게 설정
-      builder: (BuildContext context) {
-        // 모달이 열릴 때 TextField에 자동으로 포커스를 맞춤
-
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets, // 키보드가 올라왔을 때의 패딩을 추가
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            height: 200, // 모달 높이 크기
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.tertiary,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(5), // 모달 좌상단 라운딩 처리
-                topRight: Radius.circular(5), // 모달 우상단 라운딩 처리
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  child: const Icon(LineIcons.arrowLeft),
-                ),
-                Expanded(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelStyle: Theme.of(context).textTheme.bodySmall,
-                        hintStyle: Theme.of(context).textTheme.titleMedium,
-                        hintText: '작업을 입력하세요. . .',
-                        border: InputBorder.none,
-                      ),
-                      autofocus: true,
-                      controller: todayPlanController,
-                      cursorColor: Theme.of(context).colorScheme.secondary,
-                    ),
+                Obx(
+                  () => ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: completionPlan.plans.length,
+                    itemBuilder: (context, index) {
+                      return _buildBasicPlan(
+                          key: ValueKey(completionPlan.plans[index]),
+                          todayPlanItem: completionPlan.plans[index]);
+                    },
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: Obx(() =>
-                            const Icon(Icons.bookmark, color: Colors.yellow)),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () async {
-                        if (todayPlanController.text.isEmpty) {
-                          showBasicToast("작업을 입력해 주세요");
-                        } else {
-                          Plan todayPlan = Plan(planId: -1);
-                          todayPlan.planContent.value =
-                              todayPlanController.text;
-                          // todayPlan.important.value = bookMarkChecked.value;
-                          todayPlan.checked.value = false;
-                          //계획을 추가하는 버튼
-
-                          todayPlanController.text = '';
-                          Get.back();
-                          Get.back();
-                        }
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(10, 10, 5, 10),
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: const Icon(Icons.check),
-                      ),
-                    )
-                  ],
                 )
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDividingLine() {
-    return Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        height: 1,
-        width: double.infinity,
-        color: Theme.of(context).colorScheme.tertiary);
-  }
-
-  Widget buildBottomSheetMenuItem(String title, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: Center(
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: title == "계획 삭제하기" ? Colors.red : Colors.white),
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -450,6 +293,211 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
             ),
           ),
         ));
+  }
+
+  //완료목표를 수정할 수 있는 메뉴목록이 있는 바텀시트
+  Future<dynamic> completionPlanMenuBottomSheet(
+      BuildContext context, CompletionPlan completionPlan) {
+    Size screenSize = MediaQuery.of(context).size;
+    return showModalBottomSheet(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(40), // 상단 라운딩 처리
+        ),
+      ),
+      isScrollControlled: true, // 이 부분을 추가하여 스크롤이 가능하게 설정
+      builder: (BuildContext context) {
+        // 모달이 열릴 때 TextField에 자동으로 포커스를 맞춤
+
+        return Container(
+          padding: const EdgeInsets.all(15),
+          height: 290, // 모달 높이 크기
+          width: screenSize.width - 80,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(40), // 모달 좌상단 라운딩 처리
+              topRight: Radius.circular(40), // 모달 우상단 라운딩 처리
+            ),
+          ),
+          child: Column(
+            children: [
+              buildBottomSheetMenuItem("목표 달성", () {
+                data.completedPlanItems.add(completionPlan);
+                data.planItems.remove(completionPlan);
+                showBasicToast('목표를 달성하였습니다');
+                Get.back();
+              }),
+              _buildDividingLine(),
+              buildBottomSheetMenuItem("단일 계획 추가하기", () {
+                showCompletionOperationDialog(
+                    context, completionPlan, OperationType.add);
+              }),
+              _buildDividingLine(),
+              buildBottomSheetMenuItem("계획 수정하기", () {
+                showCompletionOperationDialog(
+                    context, completionPlan, OperationType.edit);
+              }),
+              _buildDividingLine(),
+              buildBottomSheetMenuItem("계획 삭제하기", () {
+                data.planItems.remove(completionPlan);
+                showBasicToast('목표를 삭제하였습니다');
+              }),
+              _buildDividingLine(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  //완료목표의 당일계획 추가,수정 하기
+  void showCompletionOperationDialog(BuildContext context,
+      CompletionPlan completionPlan, OperationType operationType) {
+    TextEditingController textController = TextEditingController();
+    if (operationType == OperationType.edit) {
+      textController.text = completionPlan.planContent.value;
+    }
+    Rx<DateTime> selectedEndDay = DateTime.now().obs;
+    Rx<ImportanceLevel> selectImportant = ImportanceLevel.middleImportance.obs;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => Dialog(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          height: 185,
+          width: 200,
+          child: Column(
+            children: [
+              TextField(
+                autofocus: true,
+                controller: textController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelStyle: Theme.of(context).textTheme.bodySmall,
+                  hintStyle: Theme.of(context).textTheme.titleMedium,
+                  hintText: '작업을 입력하세요. . .',
+                  border: InputBorder.none,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  operationType == OperationType.edit
+                      ? Row(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                showCalendarDialog(context, selectedEndDay);
+                              },
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.fromLTRB(10, 10, 5, 10),
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: const Icon(LineIcons.calendar),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                showImportantDialog(context, selectImportant);
+                              },
+                              child: Container(
+                                  padding: const EdgeInsets.all(7),
+                                  margin:
+                                      const EdgeInsets.fromLTRB(10, 10, 5, 10),
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      borderRadius: BorderRadius.circular(20)),
+                                  child: SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: Image.asset(
+                                          'assets/images/whitelogo.png'))),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                  GestureDetector(
+                    onTap: () {
+                      if (operationType == OperationType.add) {
+                        Plan plan = Plan(planId: 1);
+                        plan.planContent.value = textController.text;
+                        completionPlan.plans.add(plan);
+                      } else if (operationType == OperationType.edit) {
+                        completionPlan.planContent.value = textController.text;
+                        completionPlan.importanceLevel.value =
+                            selectImportant.value;
+                        completionPlan.endDateTime.value = selectedEndDay.value;
+                        final duration = completionPlan.endDateTime.value
+                            .difference(completionPlan.startDateTime.value);
+                        completionPlan.remainingDays.value =
+                            'D-${duration.inDays}';
+                      }
+                      Get.back();
+                      Get.back();
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 40,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(buttonRadius),
+                          color: Theme.of(context).colorScheme.secondary),
+                      child: const Icon(
+                        LineIcons.check,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDividingLine() {
+    return Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        height: 1,
+        width: double.infinity,
+        color: Theme.of(context).colorScheme.tertiary);
+  }
+
+  Widget buildBottomSheetMenuItem(String title, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: double.infinity,
+        height: 50,
+        child: Center(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: title == "계획 삭제하기"
+                    ? Colors.red
+                    : (title == "목표 달성")
+                        ? Theme.of(context).colorScheme.secondary
+                        : Colors.white),
+          ),
+        ),
+      ),
+    );
   }
 
   //완료목표 추가하는 로직
@@ -607,12 +655,12 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                           CompletionPlan plan =
                               CompletionPlan(completionPlanPlanId: 1);
                           plan.planContent.value = todayPlanController.text;
-                          plan.importanceLevel = selectImportant.value;
-                          plan.endDateTime = selectedEndDay.value;
-                          plan.startDateTime = DateTime.now();
+                          plan.importanceLevel.value = selectImportant.value;
+                          plan.endDateTime.value = selectedEndDay.value;
+                          plan.startDateTime.value = DateTime.now();
                           final duration =
-                              plan.endDateTime.difference(plan.startDateTime);
-                          plan.remainingDays.value = '${duration.inDays}';
+                              plan.endDateTime.value.difference(DateTime.now());
+                          plan.remainingDays.value = 'D-${duration.inDays}';
                           data.planItems.add(plan);
                           Get.back();
                         },

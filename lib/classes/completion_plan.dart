@@ -6,8 +6,6 @@ import 'package:second_have_to_do/global_definition.dart';
 
 import 'plan.dart';
 
-part 'completion_plan.g.dart';
-
 //책 oneThing 에서 영감을 받은 완료목표
 //쓸데없는 계획은 빼고 우선순위가 높은계획들만 추려서 넣어야 하는 조건이 있음 .
 //완료 계획 클래스
@@ -21,13 +19,13 @@ class CompletionPlan {
 
   // 중요도 체크
 
-  ImportanceLevel importanceLevel = ImportanceLevel.none;
+  Rx<ImportanceLevel> importanceLevel = ImportanceLevel.none.obs;
 
   // 시작날짜
-  DateTime startDateTime = DateTime.now();
+  Rx<DateTime> startDateTime = DateTime.now().obs;
 
   // 종료날짜
-  DateTime endDateTime = DateTime.now();
+  Rx<DateTime> endDateTime = DateTime.now().obs;
 
   //남은날짜를 볼수있는 String 클래스
   @RxStringConverter()
@@ -38,7 +36,7 @@ class CompletionPlan {
   RxBool checked = false.obs;
 
   // //완료목표안에 들어갈 목표
-  List<Plan> plans = [];
+  RxList<Plan> plans = <Plan>[].obs;
 
   //생성자
   CompletionPlan({required this.completionPlanPlanId});
@@ -51,10 +49,10 @@ class CompletionPlan {
     completionPlanPlanId = id;
   }
 
-  // Json 데이터를 가져오기
-  factory CompletionPlan.fromJson(Map<String, dynamic> json) =>
-      _$CompletionPlanFromJson(json);
+  // // Json 데이터를 가져오기
+  // factory CompletionPlan.fromJson(Map<String, dynamic> json) =>
+  //     _$CompletionPlanFromJson(json);
 
-  // Plan 객체를 Json 형태로 변환
-  Map<String, dynamic> toJson() => _$CompletionPlanToJson(this);
+  // // Plan 객체를 Json 형태로 변환
+  // Map<String, dynamic> toJson() => _$CompletionPlanToJson(this);
 }

@@ -20,7 +20,8 @@ class CompletionPlanPageData extends GetxController {
     for (int i = 0; i < 3; i++) {
       CompletionPlan completionPlan = CompletionPlan(completionPlanPlanId: i);
       completionPlan.planContent.value = '정보처리기사 합격하기';
-      completionPlan.importanceLevel = ImportanceLevel.highImportance;
+      completionPlan.importanceLevel.value = ImportanceLevel.highImportance;
+      completionPlan.remainingDays.value = 'D-30';
       for (int j = 0; j < 3; j++) {
         Plan plan = Plan(planId: j);
         plan.planContent.value = "$j";
