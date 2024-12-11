@@ -106,7 +106,8 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: data.planItems.length,
                   itemBuilder: (context, index) {
-                    return _buildCompletionPlan(data.planItems[index]);
+                    int reversIndex = data.planItems.length - index - 1;
+                    return _buildCompletionPlan(data.planItems[reversIndex]);
                   },
                 ),
               ),
@@ -192,9 +193,11 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: completionPlan.plans.length,
                     itemBuilder: (context, index) {
+                      int reversIndex = completionPlan.plans.length - index - 1;
                       return _buildBasicPlan(
-                          key: ValueKey(completionPlan.plans[index]),
-                          todayPlanItem: completionPlan.plans[index]);
+                          key: ValueKey(completionPlan.plans[reversIndex]),
+                          todayPlanItem: completionPlan.plans[reversIndex],
+                          completionPlan: completionPlan);
                     },
                   ),
                 )
@@ -207,7 +210,10 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   }
 
   //완료목표를 이루기 위한 단일 계획
-  Widget _buildBasicPlan({Key? key, required Plan todayPlanItem}) {
+  Widget _buildBasicPlan(
+      {Key? key,
+      required Plan todayPlanItem,
+      required CompletionPlan completionPlan}) {
     Size screenSize = MediaQuery.of(context).size;
     return Slidable(
         key: key,
@@ -218,13 +224,18 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
             SlidableAction(
               // 액션은 다른 것보다 크게 만들 수 있습니다.
               flex: 1,
-              onPressed: (BuildContext context) async {},
+              onPressed: (BuildContext context) async {
+                completionPlan.plans.remove(todayPlanItem);
+              },
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: LineIcons.trash,
             ),
             SlidableAction(
-                onPressed: (BuildContext context) async {},
+                onPressed: (BuildContext context) async {
+                  todayPlanItem.important.value =
+                      !todayPlanItem.important.value;
+                },
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
                 icon: LineIcons.bookmark),
@@ -256,7 +267,15 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                           activeColor: const Color(0xFF5D5D5D),
                           value: todayPlanItem.checked.value,
                           onChanged: todayPlanItem.checked.value == false
-                              ? (bool? value) async {}
+                              ? (bool? value) async {
+                                  todayPlanItem.checked.value =
+                                      !todayPlanItem.checked.value;
+
+                                  await Future.delayed(
+                                      const Duration(milliseconds: 350));
+
+                                  completionPlan.plans.remove(todayPlanItem);
+                                }
                               : (null),
                         ),
                       ),
@@ -357,18 +376,21 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
   void showCompletionOperationDialog(BuildContext context,
       CompletionPlan completionPlan, OperationType operationType) {
     TextEditingController textController = TextEditingController();
-    if (operationType == OperationType.edit) {
-      textController.text = completionPlan.planContent.value;
-    }
     Rx<DateTime> selectedEndDay = DateTime.now().obs;
     Rx<ImportanceLevel> selectImportant = ImportanceLevel.middleImportance.obs;
+    if (operationType == OperationType.edit) {
+      textController.text = completionPlan.planContent.value;
+      selectedEndDay.value = completionPlan.endDateTime.value;
+      selectImportant.value = completionPlan.importanceLevel.value;
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) => Dialog(
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: Container(
           padding: const EdgeInsets.all(15),
-          height: 185,
+          height: 195,
           width: 200,
           child: Column(
             children: [
@@ -467,14 +489,6 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildDividingLine() {
-    return Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        height: 1,
-        width: double.infinity,
-        color: Theme.of(context).colorScheme.tertiary);
   }
 
   Widget buildBottomSheetMenuItem(String title, VoidCallback onTap) {
@@ -876,5 +890,14 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
       textColor: Colors.white,
       fontSize: 14.0,
     );
+  }
+
+  //가로 선 컨테이너 위젯
+  Widget _buildDividingLine() {
+    return Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        height: 1,
+        width: double.infinity,
+        color: Theme.of(context).colorScheme.tertiary);
   }
 }
