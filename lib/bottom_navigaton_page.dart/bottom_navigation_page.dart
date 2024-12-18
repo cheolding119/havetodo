@@ -19,7 +19,6 @@ class BottomNavigationPageState extends State<BottomNavigationPage> {
     const TodayTodoListPage(),
     const CompletionPlanPage(),
     const DiaryPage(),
-    // const TodayTodoListPage(),
     const TodayTodoListPage(),
   ]; // 3개의 페이지를 연결할 예정이므로 3개의 페이지를 여기서 지정해준다. 탭 레이아웃은 3개.
 
