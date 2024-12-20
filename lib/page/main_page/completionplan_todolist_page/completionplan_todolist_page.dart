@@ -666,8 +666,15 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                       ),
                       InkWell(
                         onTap: () {
-                          CompletionPlan plan =
-                              CompletionPlan(completionPlanPlanId: 1);
+                          CompletionPlan plan = CompletionPlan(
+                            completionPlanPlanId: 1,
+                            planContent: '완료 계획 내용'.obs,
+                            checked: false.obs,
+                            startDateTime: DateTime.now().obs,
+                            endDateTime:
+                                DateTime.now().add(const Duration(days: 7)).obs,
+                            importanceLevel: ImportanceLevel.highImportance.obs,
+                          );
                           plan.planContent.value = todayPlanController.text;
                           plan.importanceLevel.value = selectImportant.value;
                           plan.endDateTime.value = selectedEndDay.value;

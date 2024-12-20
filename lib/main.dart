@@ -12,7 +12,7 @@ void main() async {
       debugShowCheckedModeBanner: false,
       theme: setDefaultTheme(),
 
-      // home: const LoginPage(), // 시작 페이지 설정~
+      // home: const LoginPage(), // 시작 페이지 설정
 
       //안녕
       home: const BottomNavigationPage(), // 시작 페이지 설정
