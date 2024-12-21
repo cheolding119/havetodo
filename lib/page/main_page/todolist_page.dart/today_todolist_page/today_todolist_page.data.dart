@@ -9,12 +9,12 @@ class TodayTodoListPageData extends GetxController {
   final RxList<Plan> planItems = <Plan>[].obs;
   final RxList<Plan> completedPlanItems = <Plan>[].obs;
 
-  LoginPageData data = Get.put(LoginPageData());
+  LoginPageData loginData = Get.put(LoginPageData());
   int memberId = -1;
 
   @override
   void onInit() {
-    memberId = data.user.memberId;
+    memberId = loginData.user.memberId;
     super.onInit();
     loadPlanDatas(1);
   }
@@ -28,7 +28,7 @@ class TodayTodoListPageData extends GetxController {
     try {
       var dio = Dio();
       var response = await dio.get(
-        "$baseUrl/api/v1/plans/$memberId",
+        "$baseUrl/api/v2/plans/$memberId",
         options: Options(
           headers: {
             Headers.contentTypeHeader: "application/json",
@@ -48,10 +48,10 @@ class TodayTodoListPageData extends GetxController {
         print(fetchedPlans);
 
         //완료한 플랜과 완료못한 계획을 분리
-        List<Plan> completedPlan =
-            fetchedPlans.where((plan) => plan.checked.value == true).toList();
         List<Plan> uncompletedPlans =
             fetchedPlans.where((plan) => plan.checked.value == false).toList();
+        List<Plan> completedPlan =
+            fetchedPlans.where((plan) => plan.checked.value == true).toList();
 
         planItems.assignAll(uncompletedPlans);
         completedPlanItems.assignAll(completedPlan);

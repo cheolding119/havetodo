@@ -7,6 +7,7 @@ import 'package:line_icons/line_icons.dart';
 import 'package:second_have_to_do/classes/completion_plan.dart';
 import 'package:second_have_to_do/classes/plan.dart';
 import 'package:second_have_to_do/global_definition.dart';
+import 'package:second_have_to_do/page/main_page/todolist_page.dart/today_todolist_page/today_todolist_page.data.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'completionplan_todolist.data.dart';
@@ -20,6 +21,7 @@ class CompletionPlanPage extends StatefulWidget {
 
 class CompletionPlanPageState extends State<CompletionPlanPage> {
   CompletionPlanPageData data = Get.put(CompletionPlanPageData());
+  TodayTodoListPageData todayData = Get.put(TodayTodoListPageData());
   @override
   void initState() {
     super.initState();
@@ -57,7 +59,13 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                     LineIcons.bars,
                     color: Colors.white,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    for (int i = 0;
+                        i < data.completedPlanItems[0].plans.length;
+                        i++) {
+                      // print(data.completedPlanItems[0].plans[i].planContent);
+                    }
+                  },
                 ),
                 const SizedBox(width: 10),
                 const Text('완료 목표')
@@ -274,7 +282,11 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                                   await Future.delayed(
                                       const Duration(milliseconds: 350));
 
-                                  completionPlan.plans.remove(todayPlanItem);
+                                  int planId = await data
+                                      .deletePlan(todayPlanItem.getId());
+                                  if (planId != 1) {
+                                    completionPlan.plans.remove(todayPlanItem);
+                                  }
                                 }
                               : (null),
                         ),
@@ -331,7 +343,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
         // 모달이 열릴 때 TextField에 자동으로 포커스를 맞춤
 
         return Container(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.all(10),
           height: 290, // 모달 높이 크기
           width: screenSize.width - 80,
           decoration: BoxDecoration(
@@ -343,7 +355,21 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
           ),
           child: Column(
             children: [
-              buildBottomSheetMenuItem("목표 달성", () {
+              Container(
+                width: 150,
+                height: 5,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiary,
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+              const SizedBox(height: 5),
+              buildBottomSheetMenuItem("목표 달성", () async {
+                if (completionPlan.plans.isNotEmpty) {
+                  for (int i = 0; i < completionPlan.plans.length; i++) {
+                    await data.deletePlan(completionPlan.plans[i].planId);
+                    await data.changeChecked(completionPlan.getId());
+                  }
+                }
                 data.completedPlanItems.add(completionPlan);
                 data.planItems.remove(completionPlan);
                 showBasicToast('목표를 달성하였습니다');
@@ -360,9 +386,16 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                     context, completionPlan, OperationType.edit);
               }),
               _buildDividingLine(),
-              buildBottomSheetMenuItem("계획 삭제하기", () {
-                data.planItems.remove(completionPlan);
-                showBasicToast('목표를 삭제하였습니다');
+              buildBottomSheetMenuItem("계획 삭제하기", () async {
+                int completionPlanId =
+                    await data.deleteCompletionPlan(completionPlan.getId());
+                if (completionPlanId != 1) {
+                  data.planItems.remove(completionPlan);
+                  showBasicToast('목표를 삭제하였습니다');
+                  Get.back();
+                } else {
+                  showBasicToast('목표를 삭제에 실패 하였습니다');
+                }
               }),
               _buildDividingLine(),
             ],
@@ -665,16 +698,19 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                                     'assets/images/whitelogo.png'))),
                       ),
                       InkWell(
-                        onTap: () {
+                        onTap: () async {
+                          RxList<Plan> plans = <Plan>[].obs;
                           CompletionPlan plan = CompletionPlan(
-                            completionPlanPlanId: 1,
-                            planContent: '완료 계획 내용'.obs,
-                            checked: false.obs,
-                            startDateTime: DateTime.now().obs,
-                            endDateTime:
-                                DateTime.now().add(const Duration(days: 7)).obs,
-                            importanceLevel: ImportanceLevel.highImportance.obs,
-                          );
+                              completionPlanPlanId: 1,
+                              planContent: '완료 계획 내용'.obs,
+                              checked: false.obs,
+                              startDateTime: DateTime.now().obs,
+                              endDateTime: DateTime.now()
+                                  .add(const Duration(days: 7))
+                                  .obs,
+                              importanceLevel:
+                                  ImportanceLevel.highImportance.obs,
+                              plans: plans);
                           plan.planContent.value = todayPlanController.text;
                           plan.importanceLevel.value = selectImportant.value;
                           plan.endDateTime.value = selectedEndDay.value;
@@ -682,7 +718,13 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                           final duration =
                               plan.endDateTime.value.difference(DateTime.now());
                           plan.remainingDays.value = 'D-${duration.inDays}';
-                          data.planItems.add(plan);
+                          //추가하는 부분
+                          int completionPlanId =
+                              await data.createCompletionPlan(1, plan);
+                          if (completionPlanId != 1) {
+                            data.planItems.add(plan);
+                          }
+
                           Get.back();
                         },
                         child: Container(

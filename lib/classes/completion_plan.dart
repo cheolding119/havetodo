@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 
-import 'package:second_have_to_do/classes/rx_string_converter.dart';
 import 'package:second_have_to_do/global_definition.dart';
 
 import 'plan.dart';
@@ -47,23 +46,29 @@ class CompletionPlan {
     completionPlanPlanId = id;
   }
 
-  CompletionPlan({
-    required this.completionPlanPlanId,
-    required this.planContent,
-    required this.checked,
-    required this.startDateTime,
-    required this.endDateTime,
-    required this.importanceLevel,
-  });
+  //기본 생성자
+  CompletionPlan(
+      {required this.completionPlanPlanId,
+      required this.planContent,
+      required this.checked,
+      required this.startDateTime,
+      required this.endDateTime,
+      required this.importanceLevel,
+      required this.plans});
 
   factory CompletionPlan.fromJson(Map<String, dynamic> json) {
     return CompletionPlan(
-      completionPlanPlanId: json['completionPlanId'],
-      planContent: json['planContent'],
-      checked: json['checked'],
-      startDateTime: DateTime.parse(json['startDate']).obs,
-      endDateTime: DateTime.parse(json['endDate']).obs,
-      importanceLevel: json['important'],
+      completionPlanPlanId: json['completionPlanId'] ?? 0,
+      planContent: json['planContent']?.toString().obs ??
+          ''.obs, // String -> RxString 변환
+      checked: RxBool(json['checked'] ?? false), // Null-safe 처리
+      startDateTime: DateTime.parse(json['startDate']).obs, // Rx<DateTime> 변환
+      endDateTime: DateTime.parse(json['endDate']).obs, // Rx<DateTime> 변환
+      importanceLevel:
+          ImportanceLevel.values.byName(json['important']).obs, // Enum 변환
+      plans: RxList<Plan>((json['plans'] as List)
+          .map((planJson) => Plan.fromJson(planJson))
+          .toList()),
     );
   }
 }
