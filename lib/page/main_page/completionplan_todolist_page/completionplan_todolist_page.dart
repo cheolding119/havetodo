@@ -501,6 +501,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                         }
                         Get.back();
                         Get.back();
+                        //ddd
                       } //완료목표를 수정할때 실행되는 로직
                       else if (operationType == OperationType.edit) {
                         bool pass = await data.changeCp(
