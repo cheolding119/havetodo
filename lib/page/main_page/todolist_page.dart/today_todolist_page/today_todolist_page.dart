@@ -68,7 +68,7 @@ class TodayTodoListPageState extends State<TodayTodoListPage> {
                   },
                 ),
                 const SizedBox(width: 10),
-                const Text('메인')
+                const Text('투두 리스트')
               ],
             ),
             IconButton(

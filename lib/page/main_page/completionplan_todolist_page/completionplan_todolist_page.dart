@@ -367,7 +367,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                 if (completionPlan.plans.isNotEmpty) {
                   for (int i = 0; i < completionPlan.plans.length; i++) {
                     await data.deletePlan(completionPlan.plans[i].planId);
-                    await data.changeChecked(completionPlan.getId());
+                    await data.changeCpChecked(completionPlan.getId());
                   }
                 }
                 data.completedPlanItems.add(completionPlan);
@@ -376,6 +376,7 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                 Get.back();
               }),
               _buildDividingLine(),
+              //단일계획 부분
               buildBottomSheetMenuItem("단일 계획 추가하기", () {
                 showCompletionOperationDialog(
                     context, completionPlan, OperationType.add);
@@ -485,23 +486,45 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
                         )
                       : Container(),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      //단일계획을 추가할때 실행되는 로직
                       if (operationType == OperationType.add) {
-                        Plan plan = Plan(planId: 1);
+                        Plan plan = Plan(planId: -1);
                         plan.planContent.value = textController.text;
-                        completionPlan.plans.add(plan);
-                      } else if (operationType == OperationType.edit) {
-                        completionPlan.planContent.value = textController.text;
-                        completionPlan.importanceLevel.value =
-                            selectImportant.value;
-                        completionPlan.endDateTime.value = selectedEndDay.value;
-                        final duration = completionPlan.endDateTime.value
-                            .difference(completionPlan.startDateTime.value);
-                        completionPlan.remainingDays.value =
-                            'D-${duration.inDays}';
+                        int planId =
+                            await data.createPlan(completionPlan.getId(), plan);
+                        plan.setId(planId);
+                        if (planId != -1) {
+                          completionPlan.plans.add(plan);
+                        } else {
+                          showBasicToast('계획추가에 실패 하였습니다');
+                        }
+                        Get.back();
+                        Get.back();
+                      } //완료목표를 수정할때 실행되는 로직
+                      else if (operationType == OperationType.edit) {
+                        bool pass = await data.changeCp(
+                            completionPlan.getId(),
+                            textController.text,
+                            selectedEndDay.value,
+                            selectImportant.value);
+                        if (pass == true) {
+                          completionPlan.planContent.value =
+                              textController.text;
+                          completionPlan.importanceLevel.value =
+                              selectImportant.value;
+                          completionPlan.endDateTime.value =
+                              selectedEndDay.value;
+                          final duration = completionPlan.endDateTime.value
+                              .difference(completionPlan.startDateTime.value);
+                          completionPlan.remainingDays.value =
+                              'D-${duration.inDays}';
+                        } else {
+                          showBasicToast('완료목표 변경에 실패 하였습니다');
+                        }
+                        Get.back();
+                        Get.back();
                       }
-                      Get.back();
-                      Get.back();
                     },
                     child: Container(
                       width: 60,
@@ -747,7 +770,6 @@ class CompletionPlanPageState extends State<CompletionPlanPage> {
       // 바텀시트가 닫힌 뒤 실행되는 로직
       Future.delayed(const Duration(milliseconds: 500), () {
         selectImportant.value = ImportanceLevel.highImportance;
-        print("1초 후 중요도 설정 완료.");
       });
     });
   }

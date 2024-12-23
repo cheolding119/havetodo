@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:second_have_to_do/classes/completion_plan.dart';
+import 'package:second_have_to_do/classes/plan.dart';
 import 'package:second_have_to_do/global_definition.dart';
 import 'package:second_have_to_do/page/login/login_page.data.dart';
 
@@ -55,6 +56,40 @@ class CompletionPlanPageData extends GetxController {
     }
   }
 
+  /*
+  생성  
+  */
+  //완료목표안의 단일계획을 추가하는 로직
+  Future<int> createPlan(int completionPlanId, Plan plan) async {
+    try {
+      var dio = Dio();
+      var response = await dio.post(
+          "$baseUrl/api/v1/completion_plan/$completionPlanId/plan",
+          data: {'planContent': plan.planContent.value},
+          options: Options(
+              headers: {Headers.contentTypeHeader: "application/json"}));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        int planId = response.data['planId'] as int;
+        return planId;
+      } else {
+        print("계획 생성 실패코드 : ${response.statusCode} ");
+        return -1;
+      }
+    } on DioException catch (dioError) {
+      print("Dio 에러: ${dioError.message}");
+      if (dioError.response != null) {
+        print("상태 코드: ${dioError.response?.statusCode}");
+        print("응답 데이터: ${dioError.response?.data}");
+        return -1;
+      }
+      return -1;
+    } catch (e) {
+      print("계획 데이터 로드 중 오류 발생: $e");
+      return -1;
+    }
+  }
+
+  // 완료목표 추가하는 로직
   Future<int> createCompletionPlan(
       int memberId, CompletionPlan completionPlan) async {
     try {
@@ -104,7 +139,7 @@ class CompletionPlanPageData extends GetxController {
   수정,변경
   */
   //checked 속성을 변경하는 메서드드
-  Future<bool> changeChecked(int completionPlanId) async {
+  Future<bool> changeCpChecked(int completionPlanId) async {
     try {
       var dio = Dio();
       var response = await dio.patch(
@@ -129,6 +164,39 @@ class CompletionPlanPageData extends GetxController {
       return false;
     }
     return false;
+  }
+
+  //완료목표 자체를 수정하는 로직
+  Future<bool> changeCp(int completionPlanId, String plnaContent,
+      DateTime endDate, ImportanceLevel important) async {
+    String endFormattedDate = DateFormat('yyyy-MM-dd').format(endDate);
+    try {
+      var dio = Dio();
+      var response = await dio.put(
+        "$baseUrl/api/v1/completion_plan/$completionPlanId",
+        data: {
+          'planContent': plnaContent,
+          'endDate': endFormattedDate,
+          'important': important.toString().split('.').last
+        },
+        options: Options(
+          headers: {Headers.contentTypeHeader: "application/json"},
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } on DioException catch (dioError) {
+      print("Dio 에러 발생: ${dioError.message}");
+      if (dioError.response != null) {
+        print("상태 코드: ${dioError.response?.statusCode}");
+        print("응답 데이터: ${dioError.response?.data}");
+      }
+      return false;
+    }
   }
 
   /*

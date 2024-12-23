@@ -1,3 +1,4 @@
+//원하는 url을 넣어주세요
 String baseUrl = "http://192.168.35.195:8080";
 
 //계획의 중요도 (제일중요,보통중요,조금중요,없음)
@@ -11,4 +12,5 @@ enum OperationType {
   delete // 삭제하기}
 }
 
+//버튼의 radius
 double buttonRadius = 16;
