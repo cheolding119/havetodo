@@ -57,15 +57,7 @@ class TodayTodoListPageState extends State<TodayTodoListPage> {
                     LineIcons.bars,
                     color: Colors.white,
                   ),
-                  onPressed: () {
-                    if (data.planItems[0].planContent.value == "") {
-                      print("같음");
-                      _showBasicToast("같음");
-                    } else {
-                      print("다름");
-                      _showBasicToast("같음");
-                    }
-                  },
+                  onPressed: () {},
                 ),
                 const SizedBox(width: 10),
                 const Text('투두 리스트')
