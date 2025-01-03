@@ -20,9 +20,7 @@ class DiaryData extends GetxController {
     diary.diaryContent.value =
         "오늘은 너무너무 짜증나는 하루였고 아무것도 하기가 싫습니다오늘은 너무너무 짜증나는 하루였고 아무것도 하기가 싫습니다오늘은 너무너무 짜증나는 하루였고 아무것도 하기가 싫습니다오늘은 너무너무 짜증나는 하루였고 아무것도 하기가 싫습니다오늘은 너무너무 짜증나는 하루였고 아무것도 하기가 싫습니다";
     diary.startTime.value = DateTime.now();
-    diary.feels.add(FeelLevel.anger);
-    diary.feels.add(FeelLevel.happiness);
-    diary.feels.add(FeelLevel.sadness);
+    diary.feel.value = FeelLevel.anger;
 
     diaryItems.add(diary);
   }

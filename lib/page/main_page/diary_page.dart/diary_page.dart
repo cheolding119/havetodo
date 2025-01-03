@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:second_have_to_do/classes/diary.dart';
 import 'package:second_have_to_do/global_definition.dart';
+import 'package:second_have_to_do/page/main_page/diary_page.dart/addpage/add_diary_page.dart';
 
 import 'diary_page.data.dart';
 
@@ -55,6 +56,18 @@ class DiaryPageState extends State<DiaryPage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+          shape: const CircleBorder(),
+          elevation: 20,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          child: const Icon(
+            Icons.add,
+            size: 35,
+          ),
+          onPressed: () {
+            Get.to(const AddDiaryPage());
+            FocusManager.instance.primaryFocus!.unfocus();
+          }),
       //본문 영역
       body: SingleChildScrollView(
         child: Row(
@@ -117,13 +130,12 @@ class DiaryPageState extends State<DiaryPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [],
-              ),
+              _buildFeelView(diaryData.feel.value),
               Row(
                 children: [
                   Text(
-                    DateFormat('yyyy-MM-dd').format(diaryData.startTime.value),
+                    DateFormat('yyyy-MM-dd HH:mm')
+                        .format(diaryData.startTime.value),
                     style: Theme.of(context)
                         .textTheme
                         .titleSmall!
@@ -139,7 +151,52 @@ class DiaryPageState extends State<DiaryPage> {
     );
   }
 
-  Widget _buildFeelContainer(FeelLevel feelLevel) {
-    return Container();
+  //감정의 표현 컴포넌트
+  Widget _buildFeelView(FeelLevel feel) {
+    //감정의 아이콘
+    Rx<Icon> icon = const Icon(Icons.abc).obs;
+    //감정 아이콘,텍스트 색상
+    Rx<Color> feelColor = Colors.black.obs;
+    //감정의 텍스트
+    RxString feelText = ''.obs;
+
+    if (feel == FeelLevel.love) {
+      feelColor.value = Colors.pink;
+      icon.value = const Icon(LineIcons.grinningFace, color: Colors.pink);
+      feelText.value = "사랑";
+    } else if (feel == FeelLevel.happiness) {
+      feelColor.value = Colors.orange;
+      icon.value =
+          const Icon(LineIcons.laughFaceWithBeamingEyes, color: Colors.orange);
+      feelText.value = "행복";
+    } else if (feel == FeelLevel.calmness) {
+      feelColor.value = Colors.yellow;
+      icon.value =
+          const Icon(LineIcons.rollingOnTheFloorLaughing, color: Colors.yellow);
+      feelText.value = "평온";
+    } else if (feel == FeelLevel.anger) {
+      feelColor.value = Colors.red;
+      icon.value = const Icon(LineIcons.angryFace, color: Colors.red);
+      feelText.value = "화남";
+    } else if (feel == FeelLevel.confusion) {
+      feelColor.value = Colors.purple;
+      icon.value = const Icon(LineIcons.flushedFace, color: Colors.purple);
+      feelText.value = "혼란";
+    } else if (feel == FeelLevel.sadness) {
+      feelColor.value = Colors.blue;
+      icon.value = const Icon(LineIcons.cryingFace, color: Colors.blue);
+      feelText.value = "슬픔";
+    }
+    return Row(
+      children: [
+        icon.value,
+        const SizedBox(width: 10),
+        Text(
+          feelText.value,
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: feelColor.value, height: 1.2, fontWeight: FontWeight.w600),
+        )
+      ],
+    );
   }
 }

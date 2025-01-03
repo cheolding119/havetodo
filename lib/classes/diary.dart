@@ -14,7 +14,7 @@ class Diary {
   //일기를 작성한 날짜
   Rx<DateTime> startTime = DateTime.now().obs;
 
-  RxList<FeelLevel> feels = <FeelLevel>[].obs;
+  Rx<FeelLevel> feel = FeelLevel.happiness.obs;
 
   int getId() {
     return diaryId;
